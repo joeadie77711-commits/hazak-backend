@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <title>Senarai Pengguna Hazak</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f6f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background: #fff;
+      padding: 30px 40px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+      animation: fadeIn 1s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .logo {
+      width: 140px;
+      margin-bottom: 20px;
+      animation: scaleUp 1.2s ease-out;
+    }
+    @keyframes scaleUp {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    h2 {
+      margin-bottom: 16px;
+      color: #333;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #0078D4;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-bottom: 20px;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    button:hover {
+      background-color: #005a9e;
+      transform: scale(1.03);
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      text-align: left;
+    }
+    li {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="images/hazak-logo.svg" alt="Logo Hazak" class="logo">
+    <h2>Selamat datang ke Hazak!</h2>
+    <button onclick="getUsers()">Lihat Semua Pengguna</button>
+    <ul id="userList"></ul>
+  </div>
+
+  <script>
+    function getUsers() {
+      const token = localStorage.getItem("token");
+      const list = document.getElementById("userList");
+      list.innerHTML = "";
+
+      if (!token) {
+        list.innerHTML = `<li class="error">Anda belum login. Sila login dahulu.</li>`;
+        return;
+      }
+
+      fetch("http://127.0.0.1:5000/users", {
+        method: "GET",
+        headers: {
+          "Authorization": "Bearer " + token
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.users) {
+          data.users.forEach(user => {
+            const li = document.createElement("li");
+            li.textContent = `${user.name} (${user.email})`;
+            list.appendChild(li);
+          });
+        } else {
+          list.innerHTML = `<li class="error">${data.error}</li>`;
+        }
+      })
+      .catch(() => {
+        list.innerHTML = `<li class="error">Ralat sambungan ke server</li>`;
+      });
+    }
+  </script>
+</body>
+</html>
