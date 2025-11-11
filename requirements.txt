@@ -8,3 +8,4 @@ bcrypt
 requests
 psycopg2-binary
 flask-migrate
+pymongo
