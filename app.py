@@ -12,8 +12,8 @@ CORS(app)
 app.config["JWT_SECRET_KEY"] = "hazakRahsiaToken123"  # Tukar ke secret sebenar
 jwt = JWTManager(app)
 
-# Sambungan ke MongoDB Atlas
-uri = "mongodb+srv://joeadie77711:220481joe@cluster0.lqzyzwf.mongodb.net/?appName=Cluster0"
+# Sambungan ke MongoDB Atlas dengan SSL bypass
+uri = "mongodb+srv://joeadie77711:220481joe@cluster0.lqzyzwf.mongodb.net/?retryWrites=true&w=majority&tlsAllowInvalidCertificates=true"
 client = MongoClient(uri, server_api=ServerApi('1'))
 
 # Uji sambungan MongoDB
