@@ -13,10 +13,10 @@ from flask_jwt_extended import (
 
 app = Flask(__name__)
 
-# ✅ Konfigurasi CORS yang lebih longgar
+# ✅ Konfigurasi CORS untuk frontend bebas domain
 CORS(app, origins="*", allow_headers="*", methods=["GET", "POST"], supports_credentials=True)
 
-# ✅ Log environment variable
+# ✅ Guna MONGO_URI dari environment
 uri = os.environ.get("MONGO_URI")
 print("🔧 MONGO_URI:", uri, flush=True)
 
