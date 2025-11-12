@@ -12,16 +12,14 @@ from flask_jwt_extended import (
 )
 
 app = Flask(__name__)
-
-# Benarkan semua origin semasa pembangunan
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-# Setup JWT
+# JWT setup
 app.config["JWT_SECRET_KEY"] = "hazakRahsiaToken123"
 jwt = JWTManager(app)
 
-# Sambungan MongoDB Atlas (tanpa TLS override)
-uri = "mongodb+srv://joeadie77711:220481joe@cluster0.lqzyzwf.mongodb.net/?retryWrites=true&w=majority"
+# MongoDB Atlas URI (bypass SSL cert validation)
+uri = "mongodb+srv://joeadie77711:220481joe@cluster0.lqzyzwf.mongodb.net/?retryWrites=true&w=majority&tls=true&tlsAllowInvalidCertificates=true"
 client = MongoClient(uri, server_api=ServerApi('1'))
 
 # Uji sambungan MongoDB
@@ -49,22 +47,13 @@ def register():
         email = data.get("email")
         password = data.get("password")
 
-        print("🧾 Nama:", name)
-        print("📧 Email:", email)
-        print("🔒 Password:", password)
-
         if not name or not email or not password:
-            print("⚠️ Medan wajib ada yang kosong")
             return jsonify({"message": "Semua medan wajib diisi"}), 400
 
         if users_collection.find_one({"email": email}):
-            print("⚠️ Email sudah didaftarkan:", email)
             return jsonify({"message": "Email sudah didaftarkan"}), 400
 
         hashed_pw = generate_password_hash(password)
-        print("🔐 Password selepas hash:", hashed_pw)
-
-        print("📦 Cuba simpan ke MongoDB...")
         result = users_collection.insert_one({
             "name": name,
             "email": email,
@@ -108,5 +97,5 @@ def get_users():
         return jsonify({"message": "Server error"}), 500
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 8080))
+    port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
