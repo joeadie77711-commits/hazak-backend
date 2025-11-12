@@ -13,14 +13,14 @@ from flask_jwt_extended import (
 
 app = Flask(__name__)
 
-# ✅ Konfigurasi CORS untuk frontend bebas domain
+# ✅ Konfigurasi CORS untuk benarkan semua origin
 CORS(app, origins="*", allow_headers="*", methods=["GET", "POST"], supports_credentials=True)
 
-# ✅ Guna MONGO_URI dari environment
+# ✅ Ambil URI MongoDB dari environment
 uri = os.environ.get("MONGO_URI")
 print("🔧 MONGO_URI:", uri, flush=True)
 
-# ✅ Sambung ke MongoDB Atlas
+# ✅ Sambung ke MongoDB Atlas dengan TLS 1.2 (Render support)
 print("🔌 Cuba sambung ke MongoDB Atlas...", flush=True)
 client = MongoClient(uri, server_api=ServerApi('1'))
 
