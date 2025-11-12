@@ -12,10 +12,12 @@ from flask_jwt_extended import (
 )
 
 app = Flask(__name__)
-CORS(app)
+
+# Benarkan semua origin semasa pembangunan
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Setup JWT
-app.config["JWT_SECRET_KEY"] = "hazakRahsiaToken123"  # Tukar ke secret sebenar
+app.config["JWT_SECRET_KEY"] = "hazakRahsiaToken123"
 jwt = JWTManager(app)
 
 # Sambungan MongoDB Atlas dengan TLS bypass
@@ -46,29 +48,38 @@ def home():
 def register():
     try:
         data = request.get_json(force=True)
-        print("Data diterima:", data)
+        print("📥 Data diterima dari frontend:", data)
 
         name = data.get("name")
         email = data.get("email")
         password = data.get("password")
 
+        print("🧾 Nama:", name)
+        print("📧 Email:", email)
+        print("🔒 Password:", password)
+
         if not name or not email or not password:
+            print("⚠️ Medan wajib ada yang kosong")
             return jsonify({"message": "Semua medan wajib diisi"}), 400
 
         if users_collection.find_one({"email": email}):
+            print("⚠️ Email sudah didaftarkan:", email)
             return jsonify({"message": "Email sudah didaftarkan"}), 400
 
         hashed_pw = generate_password_hash(password)
+        print("🔐 Password selepas hash:", hashed_pw)
+
         users_collection.insert_one({
             "name": name,
             "email": email,
             "password": hashed_pw
         })
+        print("✅ Pengguna berjaya didaftarkan:", email)
 
         return jsonify({"message": "Pendaftaran berjaya!"}), 201
 
     except Exception as e:
-        print("Error dalam /register:", e)
+        print("❌ Error dalam /register:", e)
         return jsonify({"message": "Server error"}), 500
 
 @app.route('/login', methods=['POST'])
