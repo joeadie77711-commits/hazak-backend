@@ -12,25 +12,24 @@ from flask_jwt_extended import (
 )
 
 app = Flask(__name__)
-# Aktifkan CORS sepenuhnya tanpa sekatan
 CORS(app)
 
-# JWT setup
-app.config["JWT_SECRET_KEY"] = "hazakRahsiaToken123"
-jwt = JWTManager(app)
+# ✅ Guna environment variable untuk JWT dan MongoDB
+app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_K")
+app.secret_key = os.environ.get("SECRET_KEY")
 
-# MongoDB Atlas URI dengan TLS bypass
-uri = "mongodb+srv://joeadie77711:220481joe@cluster0.lqzyzwf.mongodb.net/?retryWrites=true&w=majority&tls=true&tlsAllowInvalidCertificates=true"
+# ✅ Sambung ke MongoDB Atlas dari Railway environment
+uri = os.environ.get("MONGO_URI")
 client = MongoClient(uri, server_api=ServerApi('1'))
 
-# Uji sambungan MongoDB
+# ✅ Uji sambungan MongoDB
 try:
     client.admin.command('ping')
     print("✅ Berjaya sambung ke MongoDB Atlas!")
 except Exception as e:
     print("❌ Ralat sambungan MongoDB:", e)
 
-# Pilih database dan koleksi
+# ✅ Pilih database dan koleksi
 db = client["hazak_db"]
 users_collection = db["users"]
 
