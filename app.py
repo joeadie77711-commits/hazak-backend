@@ -12,8 +12,8 @@ from flask_jwt_extended import (
 )
 
 app = Flask(__name__)
-# Aktifkan CORS untuk semua origin dan benarkan credentials
-CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+# Aktifkan CORS sepenuhnya tanpa sekatan
+CORS(app)
 
 # JWT setup
 app.config["JWT_SECRET_KEY"] = "hazakRahsiaToken123"
