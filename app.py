@@ -12,13 +12,14 @@ from flask_jwt_extended import (
 )
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+# Aktifkan CORS untuk semua origin dan benarkan credentials
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 # JWT setup
 app.config["JWT_SECRET_KEY"] = "hazakRahsiaToken123"
 jwt = JWTManager(app)
 
-# MongoDB Atlas URI (bypass SSL cert validation)
+# MongoDB Atlas URI dengan TLS bypass
 uri = "mongodb+srv://joeadie77711:220481joe@cluster0.lqzyzwf.mongodb.net/?retryWrites=true&w=majority&tls=true&tlsAllowInvalidCertificates=true"
 client = MongoClient(uri, server_api=ServerApi('1'))
 
