@@ -1,112 +1,87 @@
 <!DOCTYPE html>
 <html lang="ms">
 <head>
-  <meta charset="UTF-8">
-  <title>Daftar Pengguna Hazak</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Daftar Pengguna - Hazak</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f4f6f8;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .container {
-      background: #fff;
-      padding: 30px 40px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      width: 100%;
+      font-family: sans-serif;
       max-width: 400px;
-      text-align: center;
-    }
-    h2 {
-      margin-bottom: 24px;
-      color: #333;
-    }
-    label {
-      display: block;
-      margin-bottom: 6px;
-      color: #555;
-      text-align: left;
-    }
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 16px;
+      margin: 50px auto;
+      padding: 20px;
       border: 1px solid #ccc;
-      border-radius: 4px;
+      border-radius: 8px;
     }
-    button {
+    input, button {
       width: 100%;
-      padding: 12px;
-      background-color: #0078D4;
-      color: white;
-      border: none;
-      border-radius: 4px;
+      margin: 8px 0;
+      padding: 10px;
+      font-size: 16px;
+    }
+    #message {
+      margin-top: 10px;
       font-weight: bold;
-      cursor: pointer;
-    }
-    #result {
-      margin-top: 20px;
-    }
-    #result img {
-      margin-top: 12px;
-      width: 140px;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Daftar Pengguna Baru</h2>
-    <form id="registerForm">
-      <label for="name">Nama:</label>
-      <input type="text" id="name" required>
+  <h2>Daftar Pengguna</h2>
+  <form id="registerForm">
+    <input type="text" id="name" placeholder="Nama" autocomplete="name" required />
+    <input type="email" id="email" placeholder="Email" autocomplete="email" required />
+    <input type="password" id="password" placeholder="Kata Laluan" autocomplete="new-password" required />
+    <button type="submit">Daftar</button>
+  </form>
 
-      <label for="email">Email:</label>
-      <input type="email" id="email" required>
-
-      <label for="password">Password:</label>
-      <input type="password" id="password" required>
-
-      <button type="submit">Daftar</button>
-    </form>
-
-    <div id="result"></div>
-  </div>
+  <p id="message"></p>
 
   <script>
-    document.getElementById("registerForm").addEventListener("submit", function(e) {
+    const form = document.getElementById('registerForm');
+    const message = document.getElementById('message');
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const name = document.getElementById("name").value;
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
 
-      fetch("http://127.0.0.1:5000/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.message) {
-          document.getElementById("result").innerHTML = `
-            <p style="color:green;">${data.message}</p>
-            <img src="images/hazak-logo.png" alt="Logo Hazak">
-            <p style="color:gray;">Anda boleh login sekarang.</p>
-          `;
-        } else {
-          document.getElementById("result").innerHTML =
-            `<p style="color:red;">${data.error}</p>`;
+      console.log("📤 Data dihantar:", { name, email, password });
+
+      try {
+        const response = await fetch('https://hazak-backend.onrender.com/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ name, email, password })
+        });
+
+        console.log("📥 Status respons:", response.status);
+        const contentType = response.headers.get("content-type");
+        console.log("📦 Content-Type:", contentType);
+
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("Respons bukan JSON");
         }
-      })
-      .catch(() => {
-        document.getElementById("result").innerHTML =
-          `<p style="color:red;">Ralat sambungan ke server</p>`;
-      });
+
+        const data = await response.json();
+        console.log("📨 Respons JSON:", data);
+
+        if (response.ok) {
+          message.textContent = data.message || 'Pendaftaran berjaya!';
+          message.style.color = 'green';
+          form.reset();
+        } else {
+          message.textContent = data.message || 'Pendaftaran gagal.';
+          message.style.color = 'red';
+        }
+      } catch (error) {
+        message.textContent = 'Ralat sambungan ke server.';
+        message.style.color = 'red';
+        console.error("❌ Ralat:", error);
+      }
     });
   </script>
 </body>
