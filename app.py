@@ -12,7 +12,9 @@ from flask_jwt_extended import (
 )
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+
+# ✅ Konfigurasi CORS yang lebih longgar
+CORS(app, origins="*", allow_headers="*", methods=["GET", "POST"], supports_credentials=True)
 
 # ✅ Log environment variable
 uri = os.environ.get("MONGO_URI")
