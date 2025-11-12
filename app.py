@@ -1,9 +1,15 @@
+import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import (
+    JWTManager,
+    create_access_token,
+    jwt_required,
+    get_jwt_identity
+)
 
 app = Flask(__name__)
 CORS(app)
@@ -71,6 +77,5 @@ def get_users():
     return jsonify({"current_user": current_user, "users": users})
 
 if __name__ == '__main__':
-   port = int(os.environ.get("PORT", 8080))
+    port = int(os.environ.get("PORT", 8080))
     app.run(host='0.0.0.0', port=port)
-

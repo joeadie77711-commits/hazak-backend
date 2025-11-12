@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <title>Daftar Pengguna Hazak</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f6f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: #fff;
+      padding: 30px 40px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    h2 {
+      margin-bottom: 24px;
+      color: #333;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: #555;
+      text-align: left;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #0078D4;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #result {
+      margin-top: 20px;
+    }
+    #result img {
+      margin-top: 12px;
+      width: 140px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Daftar Pengguna Baru</h2>
+    <form id="registerForm">
+      <label for="name">Nama:</label>
+      <input type="text" id="name" required>
+
+      <label for="email">Email:</label>
+      <input type="email" id="email" required>
+
+      <label for="password">Password:</label>
+      <input type="password" id="password" required>
+
+      <button type="submit">Daftar</button>
+    </form>
+
+    <div id="result"></div>
+  </div>
+
+  <script>
+    document.getElementById("registerForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+     fetch("https://hazak-backend.onrender.com/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.message) {
+          document.getElementById("result").innerHTML = `
+            <p style="color:green;">${data.message}</p>
+            <img src="images/hazak-logo.png" alt="Logo Hazak">
+            <p style="color:gray;">Anda boleh login sekarang.</p>
+          `;
+        } else {
+          document.getElementById("result").innerHTML =
+            `<p style="color:red;">${data.error}</p>`;
+        }
+      })
+      .catch(() => {
+        document.getElementById("result").innerHTML =
+          `<p style="color:red;">Ralat sambungan ke server</p>`;
+      });
+    });
+  </script>
+</body>
+</html>
