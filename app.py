@@ -18,16 +18,21 @@ CORS(app)
 app.config["JWT_SECRET_KEY"] = "hazakRahsiaToken123"  # Tukar ke secret sebenar
 jwt = JWTManager(app)
 
-# Sambungan ke MongoDB Atlas dengan SSL bypass
-uri = "mongodb+srv://joeadie77711:220481joe@cluster0.lqzyzwf.mongodb.net/?retryWrites=true&w=majority&tlsAllowInvalidCertificates=true"
-client = MongoClient(uri, server_api=ServerApi('1'))
+# Sambungan MongoDB Atlas dengan TLS bypass
+uri = "mongodb+srv://joeadie77711:220481joe@cluster0.lqzyzwf.mongodb.net/?retryWrites=true&w=majority&tls=true&tlsAllowInvalidCertificates=true"
+client = MongoClient(
+    uri,
+    server_api=ServerApi('1'),
+    tls=True,
+    tlsAllowInvalidCertificates=True
+)
 
 # Uji sambungan MongoDB
 try:
     client.admin.command('ping')
-    print("Pinged your deployment. You successfully connected to MongoDB!")
+    print("✅ Berjaya sambung ke MongoDB Atlas!")
 except Exception as e:
-    print("MongoDB connection error:", e)
+    print("❌ Ralat sambungan MongoDB:", e)
 
 # Pilih database dan koleksi
 db = client["hazak_db"]
@@ -39,42 +44,61 @@ def home():
 
 @app.route('/register', methods=['POST'])
 def register():
-    data = request.get_json()
-    name = data.get("name")
-    email = data.get("email")
-    password = data.get("password")
+    try:
+        data = request.get_json(force=True)
+        print("Data diterima:", data)
 
-    if users_collection.find_one({"email": email}):
-        return jsonify({"error": "Email sudah didaftarkan"}), 400
+        name = data.get("name")
+        email = data.get("email")
+        password = data.get("password")
 
-    hashed_pw = generate_password_hash(password)
-    users_collection.insert_one({
-        "name": name,
-        "email": email,
-        "password": hashed_pw
-    })
+        if not name or not email or not password:
+            return jsonify({"message": "Semua medan wajib diisi"}), 400
 
-    return jsonify({"message": "Pendaftaran berjaya!"}), 201
+        if users_collection.find_one({"email": email}):
+            return jsonify({"message": "Email sudah didaftarkan"}), 400
+
+        hashed_pw = generate_password_hash(password)
+        users_collection.insert_one({
+            "name": name,
+            "email": email,
+            "password": hashed_pw
+        })
+
+        return jsonify({"message": "Pendaftaran berjaya!"}), 201
+
+    except Exception as e:
+        print("Error dalam /register:", e)
+        return jsonify({"message": "Server error"}), 500
 
 @app.route('/login', methods=['POST'])
 def login():
-    data = request.get_json()
-    email = data.get("email")
-    password = data.get("password")
+    try:
+        data = request.get_json(force=True)
+        email = data.get("email")
+        password = data.get("password")
 
-    user = users_collection.find_one({"email": email})
-    if not user or not check_password_hash(user["password"], password):
-        return jsonify({"error": "Email atau password salah"}), 401
+        user = users_collection.find_one({"email": email})
+        if not user or not check_password_hash(user["password"], password):
+            return jsonify({"message": "Email atau kata laluan salah"}), 401
 
-    access_token = create_access_token(identity=email)
-    return jsonify({"token": access_token}), 200
+        access_token = create_access_token(identity=email)
+        return jsonify({"token": access_token}), 200
+
+    except Exception as e:
+        print("Error dalam /login:", e)
+        return jsonify({"message": "Server error"}), 500
 
 @app.route('/users', methods=['GET'])
 @jwt_required()
 def get_users():
-    current_user = get_jwt_identity()
-    users = list(users_collection.find({}, {"_id": 0, "password": 0}))
-    return jsonify({"current_user": current_user, "users": users})
+    try:
+        current_user = get_jwt_identity()
+        users = list(users_collection.find({}, {"_id": 0, "password": 0}))
+        return jsonify({"current_user": current_user, "users": users})
+    except Exception as e:
+        print("Error dalam /users:", e)
+        return jsonify({"message": "Server error"}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 8080))
