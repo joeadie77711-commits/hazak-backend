@@ -20,14 +20,9 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 app.config["JWT_SECRET_KEY"] = "hazakRahsiaToken123"
 jwt = JWTManager(app)
 
-# Sambungan MongoDB Atlas dengan TLS bypass
-uri = "mongodb+srv://joeadie77711:220481joe@cluster0.lqzyzwf.mongodb.net/?retryWrites=true&w=majority&tls=true&tlsAllowInvalidCertificates=true"
-client = MongoClient(
-    uri,
-    server_api=ServerApi('1'),
-    tls=True,
-    tlsAllowInvalidCertificates=True
-)
+# Sambungan MongoDB Atlas (tanpa TLS override)
+uri = "mongodb+srv://joeadie77711:220481joe@cluster0.lqzyzwf.mongodb.net/?retryWrites=true&w=majority"
+client = MongoClient(uri, server_api=ServerApi('1'))
 
 # Uji sambungan MongoDB
 try:
@@ -69,12 +64,13 @@ def register():
         hashed_pw = generate_password_hash(password)
         print("🔐 Password selepas hash:", hashed_pw)
 
-        users_collection.insert_one({
+        print("📦 Cuba simpan ke MongoDB...")
+        result = users_collection.insert_one({
             "name": name,
             "email": email,
             "password": hashed_pw
         })
-        print("✅ Pengguna berjaya didaftarkan:", email)
+        print("✅ Disimpan dengan _id:", result.inserted_id)
 
         return jsonify({"message": "Pendaftaran berjaya!"}), 201
 
@@ -97,7 +93,7 @@ def login():
         return jsonify({"token": access_token}), 200
 
     except Exception as e:
-        print("Error dalam /login:", e)
+        print("❌ Error dalam /login:", e)
         return jsonify({"message": "Server error"}), 500
 
 @app.route('/users', methods=['GET'])
@@ -108,7 +104,7 @@ def get_users():
         users = list(users_collection.find({}, {"_id": 0, "password": 0}))
         return jsonify({"current_user": current_user, "users": users})
     except Exception as e:
-        print("Error dalam /users:", e)
+        print("❌ Error dalam /users:", e)
         return jsonify({"message": "Server error"}), 500
 
 if __name__ == '__main__':
